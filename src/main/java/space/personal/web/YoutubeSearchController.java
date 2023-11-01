@@ -1,105 +1,70 @@
 package space.personal.web;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import space.personal.youtube.IsLive;
-import space.personal.youtube.SearchResult;
+import space.personal.domain.Follower;
+import space.personal.domain.Member;
+import space.personal.domain.youtube.SearchResult;
+import space.personal.domain.youtube.YoutubeIsLive;
+import space.personal.service.MemberService;
 
 @Controller
 public class YoutubeSearchController {
+    private MemberService memberService;
 
-    @Value("${youtube.api.key}")
-    private String youtubeApiKey;
+    public YoutubeSearchController(MemberService memberService) {
+        this.memberService = memberService;
+    }
 
     @GetMapping("/youtubeSearch")
     @ResponseBody
     public SearchResult searchChannel(Model model, @RequestParam("search") String query) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String encodedQuery = URLEncoder.encode(query, "UTF-8");
-            String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25&q=" + encodedQuery + "&type=channel&key=" + youtubeApiKey; // JSON 데이터를 가져올 URL을 지정합니다.
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                String jsonResponse = response.toString();
-                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
-
-                return searchResult;
-            } else {
-                System.out.println("HTTP 요청 실패: " + responseCode);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new SearchResult();
+        return memberService.youtubeSearchChannel(query);
     }
 
     @GetMapping("/isLive")
     @ResponseBody
-    public ArrayList<IsLive> checkLive(Model model, @RequestParam("userId") String userId){
-        ArrayList<IsLive> followers = new ArrayList<>();
-
-        return followers;
+    public ArrayList<YoutubeIsLive> checkLive(Model model, @RequestParam("userId") String userId){
+        ArrayList<YoutubeIsLive> youtubeIsLives = memberService.checkFollowerIsLive(userId);
+        return youtubeIsLives;
     }
 
-    public boolean isYoutubeLive(String channelId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
-                    +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
+    @GetMapping("/follow")
+    @ResponseBody
+    public void follow(Model model, 
+        @RequestParam("userId") String userId, 
+        @RequestParam("followName") String followName, 
+        @RequestParam("youtubeChannelId") String youtubeChannelId,
+        @RequestParam("twitchChannelId") String twitchChannelId
+    ){
+        Member member = memberService.findUser(userId);
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
+        if(memberService.checkFollow(member, youtubeChannelId)){
+            Follower follower = new Follower();
+            follower.setName(followName);
+            follower.setYoutubeChannelId(youtubeChannelId);
+            follower.setTwitchChannelId(twitchChannelId);
+            follower.setMember(member);
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                String jsonResponse = response.toString();
-                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
-                if(searchResult.getItems().get(0).getSnippet().getLiveBroadcastContent().equals("live"))
-                    return true;
-                else
-                    return false;
-            } else {
-                System.out.println("HTTP 요청 실패: " + responseCode);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            memberService.follow(member, follower);
+        }else{
+            // 중복이 있는경우 이므로 조치를 해야한다.
         }
-        return false;
+    }
+
+    @GetMapping("/unFollow")
+    @ResponseBody
+    public void unFollow(Model model, 
+        @RequestParam("userId") String userId, 
+        @RequestParam("youtubeChannelId") String youtubeChannelId){
+
+        Member member = memberService.findUser(userId);
+        memberService.unFollow(member, youtubeChannelId);
     }
 }

@@ -1,24 +1,15 @@
 package space.personal.repository;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import space.personal.domain.Follower;
 import space.personal.domain.Member;
 
 @Repository
-public class MemberRepository {
-    
-    private final EntityManager em;
-    public MemberRepository(EntityManager em) {
-        this.em = em;
-    }
-
-    public void save(Member member) {
-        em.persist(member);
-    }
-
-    public Member findOne(Long id) {
-        return em.find(Member.class, id);
-    }
+public interface MemberRepository {
+    Member save(Member member);
+    Member findMember(String userid);
+    List<Follower> findAllFollower(Long id);
 }

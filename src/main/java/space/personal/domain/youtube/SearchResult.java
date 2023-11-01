@@ -1,4 +1,4 @@
-package space.personal.youtube;
+package space.personal.domain.youtube;
 
 import java.util.List;
 
