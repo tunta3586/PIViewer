@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import space.personal.domain.Follower;
+import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
 import space.personal.domain.youtube.SearchResult;
 import space.personal.domain.youtube.YoutubeIsLive;
@@ -66,5 +67,18 @@ public class YoutubeSearchController {
 
         Member member = memberService.findUser(userId);
         memberService.unFollow(member, youtubeChannelId);
+    }
+
+    @GetMapping("/searchLiveConfig")
+    @ResponseBody
+    public LiveConfig searchLiveConfig(Model model,
+        @RequestParam("userId") String userId, 
+        @RequestParam("youtubeChannelId") String youtubeChannelId){
+
+        LiveConfig liveConfig = new LiveConfig();
+        Follower follower = memberService.findFollower(memberService.findUser(userId), youtubeChannelId);
+        liveConfig.setYoutubeLiveVideoId(memberService.youtubeLiveVideoIdSearch(youtubeChannelId));
+        liveConfig.setTwitchChannelId(follower.getTwitchChannelId());
+        return liveConfig;
     }
 }

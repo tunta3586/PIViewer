@@ -19,7 +19,7 @@ public class HomeController {
 
     @PostMapping("/signup")
     @ResponseBody
-    public boolean signUp(@RequestBody SignupRequest request){
+    public String signUp(@RequestBody SignupRequest request){
         Member member = new Member();
         member.setUsername(request.getUsername());
         member.setPassword(request.getPassword());
@@ -30,6 +30,6 @@ public class HomeController {
         // 최종 문제가 없는경우 회원가입
         memberService.join(member);
 
-        return true;
+        return "";
     }
 }

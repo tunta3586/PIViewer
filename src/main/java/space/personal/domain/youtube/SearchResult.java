@@ -19,7 +19,7 @@ public class SearchResult {
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
         public static class Id {
             private String kind;
-            private String channelId;
+            private String videoId;
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data

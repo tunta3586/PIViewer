@@ -175,4 +175,48 @@ public class MemberService {
         Member member = memberRepository.findMember(id);
         return member;
     }
+
+    /**
+     * @param member
+     * @param youtubeChannelId
+     * @return
+     */
+    public Follower findFollower(Member member, String youtubeChannelId){
+        return followerRepository.findFollower(member, youtubeChannelId);
+    }
+
+    /**
+     * @param channelId
+     * @return
+     */
+    public String youtubeLiveVideoIdSearch(String channelId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
+                    +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                String jsonResponse = response.toString();
+                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
+                return searchResult.getItems().get(0).getId().getVideoId();
+            } else {
+                System.out.println("HTTP 요청 실패: " + responseCode);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 }
