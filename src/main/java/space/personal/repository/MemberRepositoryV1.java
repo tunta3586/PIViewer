@@ -20,9 +20,13 @@ public class MemberRepositoryV1 implements MemberRepository{
 
     @Override
     public Member findMember(String userid) {
-        Member member = (Member) em.createQuery("SELECT e FROM Member e WHERE e.username = :username", 
-        Member.class).setParameter("username", userid).getSingleResult();
-        return member;
+        try {
+            Member member = (Member) em.createQuery("SELECT e FROM Member e WHERE e.username = :username", 
+            Member.class).setParameter("username", userid).getSingleResult();
+            return member;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

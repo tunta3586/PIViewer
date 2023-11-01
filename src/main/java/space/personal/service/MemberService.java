@@ -171,8 +171,8 @@ public class MemberService {
      * @param id
      * @return
      */
-    public Member findUser(String id){
-        Member member = memberRepository.findMember(id);
+    public Member findUser(String username){
+        Member member = memberRepository.findMember(username);
         return member;
     }
 
