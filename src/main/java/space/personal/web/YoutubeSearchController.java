@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,8 +19,9 @@ import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.service.MemberService;
 
 @Controller
+@CrossOrigin(origins = "localhost:3000", allowCredentials = "true")
 public class YoutubeSearchController {
-    private MemberService memberService;
+    public final MemberService memberService;
     public final SessionManager sessionManager;
 
     public YoutubeSearchController(MemberService memberService, SessionManager sessionManager) {
@@ -33,7 +35,7 @@ public class YoutubeSearchController {
         if(sessionManager.getSession(request) != null){
             return memberService.youtubeSearchChannel(query);    
         }
-        return null;
+        return new SearchResult();
     }
 
     @GetMapping("/isLive")

@@ -1,6 +1,8 @@
 package space.personal.web;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +17,7 @@ import space.personal.domain.SignupRequest;
 import space.personal.service.MemberService;
 
 @Controller
+@CrossOrigin(origins = "localhost:3000", allowCredentials = "true")
 public class HomeController {
     
     public final MemberService memberService;
@@ -61,5 +64,14 @@ public class HomeController {
     @ResponseBody
     public void logout(HttpServletRequest request){
         sessionManager.expire(request);
+    }
+
+    @GetMapping("/checkLogin")
+    @ResponseBody
+    public boolean checkCookies(Model model, HttpServletRequest request){
+        if(sessionManager.getSession(request) != null){
+            return true;    
+        }
+        return false;
     }
 }
