@@ -17,7 +17,7 @@ import space.personal.domain.SignupRequest;
 import space.personal.service.MemberService;
 
 @Controller
-@CrossOrigin(origins = "localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "${cors.origins}", allowCredentials = "true")
 public class HomeController {
     
     public final MemberService memberService;
@@ -62,8 +62,9 @@ public class HomeController {
 
     @GetMapping("/logout")
     @ResponseBody
-    public void logout(HttpServletRequest request){
+    public boolean logout(HttpServletRequest request){
         sessionManager.expire(request);
+        return true;
     }
 
     @GetMapping("/checkLogin")

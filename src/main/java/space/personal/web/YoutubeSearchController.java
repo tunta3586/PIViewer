@@ -19,7 +19,7 @@ import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.service.MemberService;
 
 @Controller
-@CrossOrigin(origins = "localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "${cors.origins}", allowCredentials = "true")
 public class YoutubeSearchController {
     public final MemberService memberService;
     public final SessionManager sessionManager;
