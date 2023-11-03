@@ -20,11 +20,11 @@ import space.personal.service.MemberService;
 
 @Controller
 @CrossOrigin(origins = "${cors.origins}", allowCredentials = "true")
-public class YoutubeSearchController {
+public class BroadcastSearchController {
     public final MemberService memberService;
     public final SessionManager sessionManager;
 
-    public YoutubeSearchController(MemberService memberService, SessionManager sessionManager) {
+    public BroadcastSearchController(MemberService memberService, SessionManager sessionManager) {
         this.memberService = memberService;
         this.sessionManager = sessionManager;
     }
