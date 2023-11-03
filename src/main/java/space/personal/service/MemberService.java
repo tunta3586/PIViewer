@@ -201,7 +201,6 @@ public class MemberService {
 
                 String jsonResponse = response.toString();
                 TwitchSearchResult TwitchSearchResult = objectMapper.readValue(jsonResponse, TwitchSearchResult.class);
-                System.out.println(TwitchSearchResult);
                 return TwitchSearchResult;
             } else {
                 System.out.println("HTTP 요청 실패: " + responseCode);

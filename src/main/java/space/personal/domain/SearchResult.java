@@ -7,5 +7,5 @@ import space.personal.domain.youtube.YoutubeSearchResult;
 @Data
 public class SearchResult {
     private TwitchSearchResult twitchSearchResult;
-    private YoutubeSearchResult youTubeSearchResult;
+    private YoutubeSearchResult youtubeSearchResult;
 }

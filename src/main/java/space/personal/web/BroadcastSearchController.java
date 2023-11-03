@@ -35,7 +35,7 @@ public class BroadcastSearchController {
         if(sessionManager.getSession(request)!= null){
             SearchResult searchResult = new SearchResult();
             searchResult.setTwitchSearchResult(memberService.twitchSearchChannel(query));
-            searchResult.setYouTubeSearchResult(memberService.youtubeSearchChannel(query));
+            searchResult.setYoutubeSearchResult(memberService.youtubeSearchChannel(query));
             return searchResult;
         }
         return new SearchResult();

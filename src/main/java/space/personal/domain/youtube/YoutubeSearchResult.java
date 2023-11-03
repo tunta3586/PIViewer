@@ -33,7 +33,7 @@ public class YoutubeSearchResult {
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
         public static class Thumbnails {
-            private Image defaultImage;
+            private Image medium;
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
