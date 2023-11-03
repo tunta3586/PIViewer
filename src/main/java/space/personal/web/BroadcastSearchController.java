@@ -14,7 +14,7 @@ import space.personal.SessionManager;
 import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
-import space.personal.domain.youtube.SearchResult;
+import space.personal.domain.SearchResult;
 import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.service.MemberService;
 
@@ -32,8 +32,11 @@ public class BroadcastSearchController {
     @GetMapping("/youtubeSearch")
     @ResponseBody
     public SearchResult searchChannel(Model model, @RequestParam("search") String query, HttpServletRequest request) {
-        if(sessionManager.getSession(request) != null){
-            return memberService.youtubeSearchChannel(query);    
+        if(sessionManager.getSession(request)!= null){
+            SearchResult searchResult = new SearchResult();
+            searchResult.setTwitchSearchResult(memberService.twitchSearchChannel(query));
+            searchResult.setYouTubeSearchResult(memberService.youtubeSearchChannel(query));
+            return searchResult;
         }
         return new SearchResult();
     }

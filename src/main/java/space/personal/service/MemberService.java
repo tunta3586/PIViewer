@@ -18,7 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import space.personal.domain.Follower;
 import space.personal.domain.Member;
-import space.personal.domain.youtube.SearchResult;
+import space.personal.domain.twitch.TwitchSearchResult;
+import space.personal.domain.youtube.YoutubeSearchResult;
 import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.repository.FollowerRepository;
 import space.personal.repository.MemberRepository;
@@ -28,6 +29,12 @@ import space.personal.repository.MemberRepository;
 public class MemberService {
     @Value("${youtube.api.key}")
     private String youtubeApiKey;
+    @Value("${twitch.api.client.id}")
+    private String twitchClientId;
+    @Value("${twitch.api.client.secret}")
+    private String twitchClientSecret;
+    @Value("${twitch.api.client.acces_token}")
+    private String twitchStringToken;
     
     private MemberRepository memberRepository;
     private FollowerRepository followerRepository;
@@ -116,7 +123,7 @@ public class MemberService {
                 in.close();
 
                 String jsonResponse = response.toString();
-                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
+                YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
                 if(searchResult.getItems().get(0).getSnippet().getLiveBroadcastContent().equals("live"))
                     return true;
                 else
@@ -134,7 +141,7 @@ public class MemberService {
      * @param query
      * @return
      */
-    public SearchResult youtubeSearchChannel(String query) {
+    public YoutubeSearchResult youtubeSearchChannel(String query) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
@@ -155,7 +162,7 @@ public class MemberService {
                 in.close();
 
                 String jsonResponse = response.toString();
-                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
+                YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
 
                 return searchResult;
             } else {
@@ -164,7 +171,45 @@ public class MemberService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new SearchResult();
+        return new YoutubeSearchResult();
+    }
+
+    /**
+     * @param query
+     * @return
+     */
+    public TwitchSearchResult twitchSearchChannel(String query) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String encodedQuery = URLEncoder.encode(query, "UTF-8");
+            String url = "https://api.twitch.tv/helix/search/channels?query=" + encodedQuery; // JSON 데이터를 가져올 URL을 지정합니다.
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", "Bearer " + twitchStringToken);
+            connection.setRequestProperty("Client-Id", twitchClientId);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                String jsonResponse = response.toString();
+                TwitchSearchResult TwitchSearchResult = objectMapper.readValue(jsonResponse, TwitchSearchResult.class);
+                System.out.println(TwitchSearchResult);
+                return TwitchSearchResult;
+            } else {
+                System.out.println("HTTP 요청 실패: " + responseCode);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new TwitchSearchResult();
     }
 
     /**
@@ -209,7 +254,7 @@ public class MemberService {
                 in.close();
 
                 String jsonResponse = response.toString();
-                SearchResult searchResult = objectMapper.readValue(jsonResponse, SearchResult.class);
+                YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
                 return searchResult.getItems().get(0).getId().getVideoId();
             } else {
                 System.out.println("HTTP 요청 실패: " + responseCode);

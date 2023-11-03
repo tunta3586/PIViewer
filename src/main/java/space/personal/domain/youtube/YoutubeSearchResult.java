@@ -8,7 +8,7 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class SearchResult {
+public class YoutubeSearchResult {
     private List<Items> items;
     
     @JsonIgnoreProperties(ignoreUnknown = true) @Data
