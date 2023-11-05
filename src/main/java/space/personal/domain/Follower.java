@@ -15,7 +15,8 @@ public class Follower {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String youtubeChannelId;
+    private String customUrl;
+    private String thumbnailsUrl;
     private String twitchChannelId;
     @ManyToOne
     @JoinColumn(name = "member_id")

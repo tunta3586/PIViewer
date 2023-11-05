@@ -9,7 +9,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import space.personal.domain.Follower;
 import space.personal.domain.Member;
-import space.personal.domain.twitch.TwitchSearchResult;
+import space.personal.domain.youtube.YoutubeChannelList;
 import space.personal.domain.youtube.YoutubeSearchResult;
-import space.personal.domain.youtube.YoutubeIsLive;
+import space.personal.domain.youtube.YoutubeSearchResult.Items;
 import space.personal.repository.FollowerRepository;
 import space.personal.repository.MemberRepository;
 
@@ -29,12 +33,6 @@ import space.personal.repository.MemberRepository;
 public class MemberService {
     @Value("${youtube.api.key}")
     private String youtubeApiKey;
-    @Value("${twitch.api.client.id}")
-    private String twitchClientId;
-    @Value("${twitch.api.client.secret}")
-    private String twitchClientSecret;
-    @Value("${twitch.api.client.acces_token}")
-    private String twitchStringToken;
     
     private MemberRepository memberRepository;
     private FollowerRepository followerRepository;
@@ -48,33 +46,58 @@ public class MemberService {
      * @param member
      */
     public void join(Member member){
+        YoutubeSearchResult youtubeSearchResult;
+        List<Follower> followerList = new ArrayList<>();
+        String searchURLs = "";
+        String nextPage = "";
+        do{ 
+            youtubeSearchResult = getYoutubeSubscribeList(member.getYoutubeChannelId(), "50", nextPage);
+            searchURLs = "";
+            for (Items result : youtubeSearchResult.getItems()) {
+                if(result.getContentDetails().getSubscription() != null)
+                    searchURLs += "&id=" + result.getContentDetails().getSubscription().getResourceId().getChannelId();
+            }
+            YoutubeChannelList youtubeChannelList = getChannelUrlList(searchURLs);
+            for (YoutubeChannelList.Items result : youtubeChannelList.getItems()) {
+                Follower follower = new Follower();
+                follower.setName(result.getSnippet().getTitle());
+                follower.setCustomUrl(result.getSnippet().getCustomUrl());
+                follower.setThumbnailsUrl(result.getSnippet().getThumbnails().getMedium().getUrl());
+                follower.setMember(member);
+                followerList.add(follower);
+            }
+            nextPage = Optional.ofNullable(youtubeSearchResult.getNextPageToken()).orElse("");
+        }while(!nextPage.equals(""));
+        member.setFollowers(followerList);
+
         memberRepository.save(member);
     }
 
-    /**
-     * @param userId
-     * @return
-     */
-    public ArrayList<YoutubeIsLive> checkFollowerIsLive(String userId){
-        List<Follower> followers = memberRepository.findMember(userId).getFollowers();
-        ArrayList<YoutubeIsLive> youtubeIsLive = new ArrayList<>();
-        for(Follower follower: followers){
-            YoutubeIsLive IsLive = new YoutubeIsLive();
-            IsLive.setTitle(follower.getName());
-            IsLive.setLive(isYoutubeLive(follower.getTwitchChannelId()));
-            youtubeIsLive.add(IsLive);
-        }
-        return youtubeIsLive;
-    }
+    // 2023-11-06 수정 예정
+    // /**
+    //  * @param userId
+    //  * @return
+    //  */
+    // public ArrayList<YoutubeIsLive> checkFollowerIsLive(String userId){
+    //     List<Follower> followers = memberRepository.findMember(userId).getFollowers();
+    //     ArrayList<YoutubeIsLive> youtubeIsLive = new ArrayList<>();
+    //     for(Follower follower: followers){
+    //         YoutubeIsLive IsLive = new YoutubeIsLive();
+    //         IsLive.setTitle(follower.getName());
+    //         IsLive.setLive(isYoutubeLive(follower.getTwitchChannelId()));
+    //         youtubeIsLive.add(IsLive);
+    //     }
+    //     return youtubeIsLive;
+    // }
 
     /**
     * @param member
      * @param follower
      * @return 
      */
-    public boolean checkFollow(Member member, String youtubeChannelId){
+    public boolean checkFollow(Member member, String customUrl){
         for (Follower follower : member.getFollowers()) {
-                if (follower.getYoutubeChannelId().equals(youtubeChannelId)) {
+                if (follower.getCustomUrl().equals(customUrl)) {
                     return false;
             }
         }
@@ -99,43 +122,81 @@ public class MemberService {
         followerRepository.deletFollower(followerRepository.findFollower(member, follower));
     }
 
-    /**
-     * @param channelId
-     * @return
-     */
-    public boolean isYoutubeLive(String channelId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
-                    +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
+    // 2023-11-16 수정 예정
+    // /**
+    //  * @param channelId
+    //  * @return
+    //  */
+    // public boolean isYoutubeLive(String channelId) {
+    //     ObjectMapper objectMapper = new ObjectMapper();
+    //     try {
+    //         String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
+    //                 +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
+    //         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    //         connection.setRequestMethod("GET");
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
+    //         int responseCode = connection.getResponseCode();
+    //         if (responseCode == HttpURLConnection.HTTP_OK) {
+    //             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+    //             String inputLine;
+    //             StringBuffer response = new StringBuffer();
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
+    //             while ((inputLine = in.readLine()) != null) {
+    //                 response.append(inputLine);
+    //             }
+    //             in.close();
 
-                String jsonResponse = response.toString();
-                YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
-                if(searchResult.getItems().get(0).getSnippet().getLiveBroadcastContent().equals("live"))
-                    return true;
-                else
-                    return false;
-            } else {
-                System.out.println("HTTP 요청 실패: " + responseCode);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+    //             String jsonResponse = response.toString();
+    //             YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
+    //             if(searchResult.getItems().get(0).getSnippet().getLiveBroadcastContent().equals("live"))
+    //                 return true;
+    //             else
+    //                 return false;
+    //         } else {
+    //             System.out.println("HTTP 요청 실패: " + responseCode);
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return false;
+    // }
+
+    // 2023-11-06 삭제
+    //  * @param query
+    //  * @return
+    //  */
+    // public YoutubeSearchResult youtubeSearchChannel(String query) {
+    //     ObjectMapper objectMapper = new ObjectMapper();
+
+    //     try {
+    //         String encodedQuery = URLEncoder.encode(query, "UTF-8");
+    //         String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25&q=" + encodedQuery + "&type=channel&key=" + youtubeApiKey; // JSON 데이터를 가져올 URL을 지정합니다.
+    //         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    //         connection.setRequestMethod("GET");
+
+    //         int responseCode = connection.getResponseCode();
+    //         if (responseCode == HttpURLConnection.HTTP_OK) {
+    //             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+    //             String inputLine;
+    //             StringBuffer response = new StringBuffer();
+
+    //             while ((inputLine = in.readLine()) != null) {
+    //                 response.append(inputLine);
+    //             }
+    //             in.close();
+
+    //             String jsonResponse = response.toString();
+    //             YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
+
+    //             return searchResult;
+    //         } else {
+    //             System.out.println("HTTP 요청 실패: " + responseCode);
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return new YoutubeSearchResult();
+    // }
 
     /**
      * @param query
@@ -174,42 +235,43 @@ public class MemberService {
         return new YoutubeSearchResult();
     }
 
-    /**
-     * @param query
-     * @return
-     */
-    public TwitchSearchResult twitchSearchChannel(String query) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            String encodedQuery = URLEncoder.encode(query, "UTF-8");
-            String url = "https://api.twitch.tv/helix/search/channels?query=" + encodedQuery; // JSON 데이터를 가져올 URL을 지정합니다.
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", "Bearer " + twitchStringToken);
-            connection.setRequestProperty("Client-Id", twitchClientId);
+    // 2023-11-06 삭제
+    // /**
+    //  * @param query
+    //  * @return
+    //  */
+    // public TwitchSearchResult twitchSearchChannel(String query) {
+    //     ObjectMapper objectMapper = new ObjectMapper();
+    //     try {
+    //         String encodedQuery = URLEncoder.encode(query, "UTF-8");
+    //         String url = "https://api.twitch.tv/helix/search/channels?query=" + encodedQuery; // JSON 데이터를 가져올 URL을 지정합니다.
+    //         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    //         connection.setRequestMethod("GET");
+    //         connection.setRequestProperty("Authorization", "Bearer " + twitchStringToken);
+    //         connection.setRequestProperty("Client-Id", twitchClientId);
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
+    //         int responseCode = connection.getResponseCode();
+    //         if (responseCode == HttpURLConnection.HTTP_OK) {
+    //             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+    //             String inputLine;
+    //             StringBuffer response = new StringBuffer();
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
+    //             while ((inputLine = in.readLine()) != null) {
+    //                 response.append(inputLine);
+    //             }
+    //             in.close();
 
-                String jsonResponse = response.toString();
-                TwitchSearchResult TwitchSearchResult = objectMapper.readValue(jsonResponse, TwitchSearchResult.class);
-                return TwitchSearchResult;
-            } else {
-                System.out.println("HTTP 요청 실패: " + responseCode);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new TwitchSearchResult();
-    }
+    //             String jsonResponse = response.toString();
+    //             TwitchSearchResult TwitchSearchResult = objectMapper.readValue(jsonResponse, TwitchSearchResult.class);
+    //             return TwitchSearchResult;
+    //         } else {
+    //             System.out.println("HTTP 요청 실패: " + responseCode);
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return new TwitchSearchResult();
+    // }
 
     /**
      * @param id
@@ -229,15 +291,70 @@ public class MemberService {
         return followerRepository.findFollower(member, youtubeChannelId);
     }
 
+    // 2023-11-06 삭제
+    // /**
+    //  * @param channelId
+    //  * @return
+    //  */
+    // public String youtubeLiveVideoIdSearch(String channelId) {
+    //     ObjectMapper objectMapper = new ObjectMapper();
+    //     try {
+    //         String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
+    //                 +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
+    //         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    //         connection.setRequestMethod("GET");
+
+    //         int responseCode = connection.getResponseCode();
+    //         if (responseCode == HttpURLConnection.HTTP_OK) {
+    //             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+    //             String inputLine;
+    //             StringBuffer response = new StringBuffer();
+
+    //             while ((inputLine = in.readLine()) != null) {
+    //                 response.append(inputLine);
+    //             }
+    //             in.close();
+
+    //             String jsonResponse = response.toString();
+    //             YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
+    //             return searchResult.getItems().get(0).getId().getVideoId();
+    //         } else {
+    //             System.out.println("HTTP 요청 실패: " + responseCode);
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return "";
+    // }
+
     /**
-     * @param channelId
+     * 괜찮을라나? 리턴값을 지금은 라이브 url만 보내고 있긴한데 얻은 데이터로 is live 인지도 알수 있고 video id도 찾을수는 있는데
+     * @param channelUrl
+     * @return videoId
+     */
+    public String getLiveVideolUrl(String channelUrl){
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--headless");
+        WebDriver driver = new ChromeDriver(chromeOptions);
+        driver.get("https://www.youtube.com/"+ channelUrl +"/streams");
+        String videoId = driver.getPageSource().split("is-live-video")[1].split("content")[0].split("watch?")[1].substring(3,14);
+        driver.quit();
+        return videoId;
+    }
+
+    // 2023-11-06 추가
+    /**
+     * @param youtubeChannelId
      * @return
      */
-    public String youtubeLiveVideoIdSearch(String channelId) {
+    public YoutubeSearchResult getYoutubeSubscribeList(String youtubeChannelId, String maxResults, String pageToken) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            String url = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelType=any&maxResults=25"
-                    +"&channelId=" + channelId + "&eventType=live&type=video&key=" + youtubeApiKey;
+            String url = "https://www.googleapis.com/youtube/v3/activities?part=snippet%2CcontentDetails"
+                    +"&channelId=" + youtubeChannelId
+                    +"&maxResults="+ maxResults
+                    +"&pageToken="+ pageToken
+                    + "&key=" + youtubeApiKey;
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("GET");
 
@@ -254,13 +371,49 @@ public class MemberService {
 
                 String jsonResponse = response.toString();
                 YoutubeSearchResult searchResult = objectMapper.readValue(jsonResponse, YoutubeSearchResult.class);
-                return searchResult.getItems().get(0).getId().getVideoId();
+                return searchResult;
             } else {
                 System.out.println("HTTP 요청 실패: " + responseCode);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return new YoutubeSearchResult();
+    }
+
+    // 2023-11-06 추가
+    /**
+     * @param youtubeChannelIds
+     * @return
+     */
+    public YoutubeChannelList getChannelUrlList(String youtubeChannelIds) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String url = "https://www.googleapis.com/youtube/v3/channels?part=snippet&maxResults=50"
+                    + youtubeChannelIds + "&key=" + youtubeApiKey;;
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                String jsonResponse = response.toString();
+                YoutubeChannelList searchResult = objectMapper.readValue(jsonResponse, YoutubeChannelList.class);
+                return searchResult;
+            } else {
+                System.out.println("HTTP 요청 실패: " + responseCode);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new YoutubeChannelList();
     }
 }

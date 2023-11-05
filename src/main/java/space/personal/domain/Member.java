@@ -20,6 +20,7 @@ public class Member {
     @Column(unique = true)
     private String username;
     private String password;
+    private String youtubeChannelId;
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Follower> followers;
 }

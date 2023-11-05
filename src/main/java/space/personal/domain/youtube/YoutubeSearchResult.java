@@ -10,25 +10,18 @@ import lombok.Data;
 @Data
 public class YoutubeSearchResult {
     private List<Items> items;
+    private String nextPageToken;
+    private PageInfo pageInfo;
     
     @JsonIgnoreProperties(ignoreUnknown = true) @Data
     public static class Items{
-        private Id id;
         private Snippet snippet;
-
-        @JsonIgnoreProperties(ignoreUnknown = true) @Data
-        public static class Id {
-            private String kind;
-            private String videoId;
-        }
+        private ContentDetails contentDetails;
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
         public static class Snippet {
-            private String channelId;
-            private String title;
-            private String description;
+            private String channelTitle;
             private Thumbnails thumbnails;
-            private String liveBroadcastContent;
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
@@ -40,5 +33,25 @@ public class YoutubeSearchResult {
         public static class Image {
             private String url;
         }
+
+        @JsonIgnoreProperties(ignoreUnknown = true) @Data
+        public static class ContentDetails {
+            private Subscription subscription;
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true) @Data
+        public static class Subscription {
+            private ResourceId resourceId;
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true) @Data
+        public static class ResourceId {
+            private String channelId;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true) @Data
+    public static class PageInfo {
+        private int totalResults;
     }
 }

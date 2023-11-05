@@ -34,11 +34,13 @@ public class HomeController {
         Member member = new Member();
         member.setUsername(request.getUsername());
         member.setPassword(request.getPassword());
+        member.setYoutubeChannelId(request.getYoutubeChannelId());
         
         // 중복 체크
         if(memberService.findUser(member.getUsername()) != null){
             return "false";
         }
+        // youtube channel id check 가 필요하다.
         memberService.join(member);
         return "true";
     }

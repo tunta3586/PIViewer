@@ -1,6 +1,5 @@
 package space.personal.web;
 
-import java.util.ArrayList;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,10 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import space.personal.SessionManager;
 import space.personal.domain.Follower;
-import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
-import space.personal.domain.SearchResult;
-import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.service.MemberService;
 
 @Controller
@@ -29,42 +25,44 @@ public class BroadcastSearchController {
         this.sessionManager = sessionManager;
     }
 
-    @GetMapping("/youtubeSearch")
-    @ResponseBody
-    public SearchResult searchChannel(Model model, @RequestParam("search") String query, HttpServletRequest request) {
-        if(sessionManager.getSession(request)!= null){
-            SearchResult searchResult = new SearchResult();
-            searchResult.setTwitchSearchResult(memberService.twitchSearchChannel(query));
-            searchResult.setYoutubeSearchResult(memberService.youtubeSearchChannel(query));
-            return searchResult;
-        }
-        return new SearchResult();
-    }
+    // 2023-11-06 삭제
+    // @GetMapping("/youtubeSearch")
+    // @ResponseBody
+    // public SearchResult searchChannel(Model model, @RequestParam("search") String query, HttpServletRequest request) {
+    //     if(sessionManager.getSession(request)!= null){
+    //         SearchResult searchResult = new SearchResult();
+    //         searchResult.setTwitchSearchResult(memberService.twitchSearchChannel(query));
+    //         searchResult.setYoutubeSearchResult(memberService.youtubeSearchChannel(query));
+    //         return searchResult;
+    //     }
+    //     return new SearchResult();
+    // }
 
-    @GetMapping("/isLive")
-    @ResponseBody
-    public ArrayList<YoutubeIsLive> checkLive(Model model, @RequestParam("userId") String userId, HttpServletRequest request){
-        if(sessionManager.getSession(request) != null){
-            return memberService.checkFollowerIsLive(userId);
-        }
-        return null;
-    }
+    // 2023-11-06 수정 예정
+    // @GetMapping("/isLive")
+    // @ResponseBody
+    // public ArrayList<YoutubeIsLive> checkLive(Model model, @RequestParam("userId") String userId, HttpServletRequest request){
+    //     if(sessionManager.getSession(request) != null){
+    //         return memberService.checkFollowerIsLive(userId);
+    //     }
+    //     return null;
+    // }
 
     @GetMapping("/follow")
     @ResponseBody
     public void follow(Model model, 
         @RequestParam("followName") String followName, 
-        @RequestParam("youtubeChannelId") String youtubeChannelId,
+        @RequestParam("customUrl") String customUrl,
         @RequestParam("twitchChannelId") String twitchChannelId,
         HttpServletRequest request
     ){
         Member member = (Member)sessionManager.getSession(request);
         if(member != null){
             member = memberService.findUser(member.getUsername());
-            if(memberService.checkFollow(member, youtubeChannelId)){
+            if(memberService.checkFollow(member, customUrl)){
                 Follower follower = new Follower();
                 follower.setName(followName);
-                follower.setYoutubeChannelId(youtubeChannelId);
+                follower.setCustomUrl(customUrl);
                 follower.setTwitchChannelId(twitchChannelId);
                 follower.setMember(member);
 
@@ -88,20 +86,21 @@ public class BroadcastSearchController {
         }
     }
 
-    @GetMapping("/searchLiveConfig")
-    @ResponseBody
-    public LiveConfig searchLiveConfig(Model model,
-        @RequestParam("userId") String userId, 
-        @RequestParam("youtubeChannelId") String youtubeChannelId,
-        HttpServletRequest request
-    ){
-        if(sessionManager.getSession(request) != null){
-            LiveConfig liveConfig = new LiveConfig();
-            Follower follower = memberService.findFollower(memberService.findUser(userId), youtubeChannelId);
-            liveConfig.setYoutubeLiveVideoId(memberService.youtubeLiveVideoIdSearch(youtubeChannelId));
-            liveConfig.setTwitchChannelId(follower.getTwitchChannelId());
-            return liveConfig;
-        }
-        return null;
-    }
+    // 2023-11-06 수정 예정
+    // @GetMapping("/searchLiveConfig")
+    // @ResponseBody
+    // public LiveConfig searchLiveConfig(Model model,
+    //     @RequestParam("userId") String userId, 
+    //     @RequestParam("youtubeChannelId") String youtubeChannelId,
+    //     HttpServletRequest request
+    // ){
+    //     if(sessionManager.getSession(request) != null){
+    //         LiveConfig liveConfig = new LiveConfig();
+    //         Follower follower = memberService.findFollower(memberService.findUser(userId), youtubeChannelId);
+    //         liveConfig.setYoutubeLiveVideoId(memberService.youtubeLiveVideoIdSearch(youtubeChannelId));
+    //         liveConfig.setTwitchChannelId(follower.getTwitchChannelId());
+    //         return liveConfig;
+    //     }
+    //     return null;
+    // }
 }
