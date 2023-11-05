@@ -53,15 +53,14 @@ public class BroadcastSearchController {
     @GetMapping("/follow")
     @ResponseBody
     public void follow(Model model, 
-        @RequestParam("userId") String userId, 
         @RequestParam("followName") String followName, 
         @RequestParam("youtubeChannelId") String youtubeChannelId,
         @RequestParam("twitchChannelId") String twitchChannelId,
         HttpServletRequest request
     ){
-        if(sessionManager.getSession(request) != null){
-            Member member = memberService.findUser(userId);
-
+        Member member = (Member)sessionManager.getSession(request);
+        if(member != null){
+            member = memberService.findUser(member.getUsername());
             if(memberService.checkFollow(member, youtubeChannelId)){
                 Follower follower = new Follower();
                 follower.setName(followName);

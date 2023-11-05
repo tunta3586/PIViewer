@@ -74,11 +74,11 @@ public class MemberService {
      */
     public boolean checkFollow(Member member, String youtubeChannelId){
         for (Follower follower : member.getFollowers()) {
-            if (follower.getYoutubeChannelId().equals(youtubeChannelId)) {
-               return true;
+                if (follower.getYoutubeChannelId().equals(youtubeChannelId)) {
+                    return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**

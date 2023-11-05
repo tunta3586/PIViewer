@@ -1,6 +1,5 @@
 package space.personal.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -23,11 +22,4 @@ public class Member {
     private String password;
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Follower> followers;
-    
-    public List<Follower> getFollowers() {
-    if (followers == null) {
-        followers = new ArrayList<>();
-    }
-        return followers;
-    }
 }
