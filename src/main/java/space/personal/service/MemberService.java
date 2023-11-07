@@ -21,7 +21,6 @@ import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
 import space.personal.domain.youtube.YoutubeChannelList;
-import space.personal.domain.youtube.YoutubeIsLive;
 import space.personal.domain.youtube.YoutubeSearchResult;
 import space.personal.domain.youtube.YoutubeSearchResult.Items;
 import space.personal.repository.FollowerRepository;
@@ -59,43 +58,34 @@ public class MemberService {
                 if(result.getContentDetails().getSubscription() != null)
                     searchURLs += "&id=" + result.getContentDetails().getSubscription().getResourceId().getChannelId();
             }
-            YoutubeChannelList youtubeChannelList = getChannelUrlList(searchURLs);
-            for (YoutubeChannelList.Items result : youtubeChannelList.getItems()) {
-                Follower follower = new Follower();
-                follower.setName(result.getSnippet().getTitle());
+            if(!searchURLs.equals("")){
+                YoutubeChannelList youtubeChannelList = getChannelUrlList(searchURLs);
+                for (YoutubeChannelList.Items result : youtubeChannelList.getItems()) {
+                    Follower follower = new Follower();
 
-                LiveConfig liveConfig = Optional.ofNullable(liveConfigRepository.findByCustomUrl(result.getSnippet().getCustomUrl())).orElse(null);
-                if(liveConfig == null){
-                    liveConfig = new LiveConfig();
-                    liveConfig.setCustomUrl(result.getSnippet().getCustomUrl());
-                    liveConfig.setThumbnailsUrl(result.getSnippet().getThumbnails().getMedium().getUrl());
+                    LiveConfig liveConfig = Optional.ofNullable(liveConfigRepository.findByCustomUrl(result.getSnippet().getCustomUrl())).orElse(null);
+                    if(liveConfig == null){
+                        liveConfig = new LiveConfig();
+                        liveConfig.setName(result.getSnippet().getTitle());
+                        String description = result.getSnippet().getDescription();
+                        if (description != null && description.length() > 100) {
+                            liveConfig.setDescription(description.substring(0, 100));
+                        } else {
+                            liveConfig.setDescription(description);
+                        }
+                        liveConfig.setCustomUrl(result.getSnippet().getCustomUrl());
+                        liveConfig.setThumbnailsUrl(result.getSnippet().getThumbnails().getMedium().getUrl());
+                    }
+                    follower.setLiveConfig(liveConfig);
+                    follower.setMember(member);
+                    followerList.add(follower);
                 }
-                follower.setLiveConfig(liveConfig);
-                follower.setMember(member);
-                followerList.add(follower);
+                nextPage = Optional.ofNullable(youtubeSearchResult.getNextPageToken()).orElse("");
             }
-            nextPage = Optional.ofNullable(youtubeSearchResult.getNextPageToken()).orElse("");
         }while(!nextPage.equals(""));
         member.setFollowers(followerList);
 
         memberRepository.save(member);
-    }
-
-    // /**
-    //  * @param userId
-    //  * @return
-    //  * @throws InterruptedException
-    //  */
-    public ArrayList<YoutubeIsLive> checkFollowerIsLive(String userId) throws InterruptedException{
-        List<Follower> followers = memberRepository.findMember(userId).getFollowers();
-        ArrayList<YoutubeIsLive> youtubeIsLive = new ArrayList<>();
-        for(Follower follower: followers){
-            YoutubeIsLive IsLive = new YoutubeIsLive();
-            IsLive.setTitle(follower.getName());
-            IsLive.setIsLive(follower.getLiveConfig().getIsLive());
-            youtubeIsLive.add(IsLive);
-        }
-        return youtubeIsLive;
     }
 
     /**
@@ -258,5 +248,9 @@ public class MemberService {
             e.printStackTrace();
         }
         return new YoutubeChannelList();
+    }
+
+    public LiveConfig searchChannel(String customUrl){
+        return Optional.ofNullable(liveConfigRepository.findByCustomUrl(customUrl)).orElse(null);
     }
 }

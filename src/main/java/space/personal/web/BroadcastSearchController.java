@@ -1,7 +1,7 @@
 package space.personal.web;
 
-
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,7 @@ import space.personal.SessionManager;
 import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
-import space.personal.domain.youtube.YoutubeIsLive;
+import space.personal.domain.youtube.SearchResult;
 import space.personal.repository.LiveConfigRepository;
 import space.personal.service.MemberService;
 
@@ -33,22 +33,11 @@ public class BroadcastSearchController {
         this.liveConfigRepository = liveConfigRepository;
     }
 
-    // 2023-11-06 수정 예정
-    // 해당 함수는 follow 목록을 본 다음에 해당 함수를 
-    @GetMapping("/isLive")
-    @ResponseBody
-    public ArrayList<YoutubeIsLive> checkLive(Model model, @RequestParam("userId") String userId, HttpServletRequest request) throws InterruptedException{
-        return memberService.checkFollowerIsLive(userId);
-        // return new ArrayList<YoutubeIsLive>();
-    }
-
     // 기능에 대해서 다시 생각
     @GetMapping("/follow")
     @ResponseBody
     public void follow(Model model, 
-        @RequestParam("followName") String followName, 
         @RequestParam("customUrl") String customUrl,
-        @RequestParam("twitchChannelId") String twitchChannelId,
         HttpServletRequest request
     ){
         Member member = (Member)sessionManager.getSession(request);
@@ -61,9 +50,7 @@ public class BroadcastSearchController {
             member = memberService.findUser(member.getUsername());
             if(memberService.checkFollow(member, customUrl)){
                 Follower follower = new Follower();
-                follower.setName(followName);
                 follower.setLiveConfig(liveConfig);
-                follower.setTwitchChannelId(twitchChannelId);
                 follower.setMember(member);
 
                 memberService.follow(member, follower);
@@ -88,21 +75,43 @@ public class BroadcastSearchController {
         }
     }
 
-    // 2023-11-06 수정 예정
-    // @GetMapping("/searchLiveConfig")
-    // @ResponseBody
-    // public LiveConfig searchLiveConfig(Model model,
-    //     @RequestParam("userId") String userId, 
-    //     @RequestParam("youtubeChannelId") String youtubeChannelId,
-    //     HttpServletRequest request
-    // ){
-    //     if(sessionManager.getSession(request) != null){
-    //         LiveConfig liveConfig = new LiveConfig();
-    //         Follower follower = memberService.findFollower(memberService.findUser(userId), youtubeChannelId);
-    //         liveConfig.setYoutubeLiveVideoId(memberService.youtubeLiveVideoIdSearch(youtubeChannelId));
-    //         liveConfig.setTwitchChannelId(follower.getTwitchChannelId());
-    //         return liveConfig;
-    //     }
-    //     return null;
-    // }
+    // 생각해보면 크게 문제는 안될것 같다.
+    // 기능은 있으면 편하고 없으면 불편한 딱 그정도
+    @GetMapping("/searchChannel")
+    @ResponseBody
+    public SearchResult searchChannel(Model model, 
+        @RequestParam("search") String customUrl, 
+        HttpServletRequest request
+    ){  
+        SearchResult searchResult = new SearchResult();
+        if(sessionManager.getSession(request) != null){
+            LiveConfig liveConfig = memberService.searchChannel(customUrl);
+            searchResult.setLiveConfig(liveConfig);
+            if(liveConfig != null) searchResult.setSearchResult(true);
+            else searchResult.setSearchResult(false);
+            return searchResult;
+        }
+        searchResult.setSearchResult(false);
+        return searchResult;
+    }
+
+    // 생각해보면 크게 문제는 안될것 같다.
+    // 기능은 있으면 편하고 없으면 불편한 딱 그정도
+    @GetMapping("/getFollowChannels")
+    @ResponseBody
+    public List<LiveConfig> getFollowChannels(Model model, 
+        HttpServletRequest request
+    ){  
+        Member member = (Member)sessionManager.getSession(request);
+        if(member != null){
+            member = memberService.findUser(member.getUsername());
+            List<Follower> followers = member.getFollowers();
+            List<LiveConfig> configs = new ArrayList<>();
+            for(Follower follower : followers){
+                configs.add(follower.getLiveConfig());
+            }
+            return configs;
+        }
+        return new ArrayList<LiveConfig>();
+    }
 }

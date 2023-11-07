@@ -20,6 +20,7 @@ public class YoutubeChannelList {
         public static class Snippet {
             private String title;
             private String customUrl;
+            private String description;
             private String channelTitle;
             private Thumbnails thumbnails;
         }
