@@ -114,4 +114,48 @@ public class BroadcastSearchController {
         }
         return new ArrayList<LiveConfig>();
     }
+
+    @GetMapping("/getLiveStreamTwitchChannelId")
+    @ResponseBody
+    public String getLiveStreamTwitchChannelId(Model model, 
+        @RequestParam("custumUrl") String customUrl, 
+        HttpServletRequest request
+    ){  
+        Member member = (Member)sessionManager.getSession(request);
+        if(member != null){
+            member = memberService.findUser(member.getUsername());
+            LiveConfig liveConfig = memberService.searchChannel(customUrl);
+            List<Follower> followers = member.getFollowers();
+            for(Follower follower : followers){
+                if(follower.getLiveConfig().equals(liveConfig)){
+                    return follower.getTwitchChannelId();
+                }
+            }
+        }
+        return "";
+    }
+
+    @GetMapping("/setLiveStreamTwitchChannelId")
+    @ResponseBody
+    public boolean setLiveStreamTwitchChannelId(Model model, 
+        @RequestParam("custumUrl") String customUrl, 
+        @RequestParam("twitchChannelId") String twitchChannelId, 
+        HttpServletRequest request
+    ){  
+        Member member = (Member)sessionManager.getSession(request);
+        if(member != null){
+            member = memberService.findUser(member.getUsername());
+            LiveConfig liveConfig = memberService.searchChannel(customUrl);
+            List<Follower> followers = member.getFollowers();
+            for(Follower follower : followers){
+                if(follower.getLiveConfig().equals(liveConfig)){
+                    follower.setTwitchChannelId(twitchChannelId);
+                    memberService.setTwitchChannelId(follower);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
+

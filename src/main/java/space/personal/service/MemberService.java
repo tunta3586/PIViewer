@@ -78,6 +78,7 @@ public class MemberService {
                     }
                     follower.setLiveConfig(liveConfig);
                     follower.setMember(member);
+                    follower.setTwitchChannelId("");
                     followerList.add(follower);
                 }
                 nextPage = Optional.ofNullable(youtubeSearchResult.getNextPageToken()).orElse("");
@@ -110,6 +111,15 @@ public class MemberService {
     public void follow(Member member, Follower follower){
         member.getFollowers().add(follower);
         memberRepository.save(member);
+    }
+
+    /**
+     * @param member
+     * @param follower
+     * @return
+     */
+    public void setTwitchChannelId(Follower follower){
+        followerRepository.saveFollower(follower);
     }
 
     /**
