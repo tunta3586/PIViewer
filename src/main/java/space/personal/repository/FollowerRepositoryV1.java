@@ -23,9 +23,9 @@ public class FollowerRepositoryV1 implements FollowerRepository{
     }
 
     @Override
-    public Follower findFollower(Member member, String youtubeChannelId) {
-        Follower follower = em.createQuery("SELECT e FROM Follower e WHERE e.youtubeChannelId = :youtubeChannelId AND e.member.id = :memberId", Follower.class).
-        setParameter("youtubeChannelId", youtubeChannelId).
+    public Follower findFollower(Member member, String customUrl) {
+        Follower follower = em.createQuery("SELECT e FROM Follower e WHERE e.customUrl = :customUrl AND e.member.id = :memberId", Follower.class).
+        setParameter("customUrl", customUrl).
         setParameter("memberId", member.getId()).
         getSingleResult();
         return follower;

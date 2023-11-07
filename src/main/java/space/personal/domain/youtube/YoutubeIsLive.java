@@ -8,5 +8,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YoutubeIsLive {
     private String title;
-    private boolean isLive;
+    
+    // 나중에 Enum으로 다시 처리할 예정
+    private String isLive;
 }
