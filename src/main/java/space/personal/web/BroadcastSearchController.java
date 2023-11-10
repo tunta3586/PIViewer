@@ -16,6 +16,7 @@ import space.personal.SessionManager;
 import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
+import space.personal.domain.TwitchSearchResult;
 import space.personal.domain.youtube.SearchResult;
 import space.personal.repository.LiveConfigRepository;
 import space.personal.service.MemberService;
@@ -156,6 +157,17 @@ public class BroadcastSearchController {
             }
         }
         return false;
+    }
+
+    @GetMapping("/twitchSearchChannel")
+    @ResponseBody
+    public TwitchSearchResult twitchSearchChannel(Model model, @RequestParam("search") String query, 
+        HttpServletRequest request) {
+        if(sessionManager.getSession(request)!= null){
+            TwitchSearchResult twitchSearchResult = memberService.twitchSearchChannel(query);
+            return twitchSearchResult;
+        }
+        return new TwitchSearchResult();
     }
 }
 
