@@ -17,9 +17,11 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(name = "username", unique = true)
     private String username;
+    @Column(name = "password")
     private String password;
+    @Column(name = "youtube_channel_id") 
     private String youtubeChannelId;
     @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private List<Follower> followers;
