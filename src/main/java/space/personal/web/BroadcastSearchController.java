@@ -2,7 +2,6 @@ package space.personal.web;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,6 @@ import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
 import space.personal.domain.TwitchSearchResult;
 import space.personal.domain.youtube.SearchResult;
-import space.personal.repository.LiveConfigRepository;
 import space.personal.service.MemberService;
 
 @Controller
@@ -26,12 +24,10 @@ import space.personal.service.MemberService;
 public class BroadcastSearchController {
     public final MemberService memberService;
     public final SessionManager sessionManager;
-    public final LiveConfigRepository liveConfigRepository;
 
-    public BroadcastSearchController(MemberService memberService, SessionManager sessionManager, LiveConfigRepository liveConfigRepository) {
+    public BroadcastSearchController(MemberService memberService, SessionManager sessionManager) {
         this.memberService = memberService;
         this.sessionManager = sessionManager;
-        this.liveConfigRepository = liveConfigRepository;
     }
 
     // 기능에 대해서 다시 생각
@@ -42,8 +38,7 @@ public class BroadcastSearchController {
         HttpServletRequest request
     ){
         Member member = (Member)sessionManager.getSession(request);
-        LiveConfig liveConfig = Optional.ofNullable(liveConfigRepository.findByCustomUrl(customUrl)).orElse(null);
-
+        LiveConfig liveConfig = memberService.searchChannel(customUrl);
         // liveConfig 가 존재하지 않은 경우에는 동작하지 않는다.
         // 해당의 경우에는 에러를 보내거나 하는것이 옳을것으로 보인다.
         // 따로 안내를 해야할 것 같다. => Refresh 함수 같은것이 필요로 할것으로 보인다.
