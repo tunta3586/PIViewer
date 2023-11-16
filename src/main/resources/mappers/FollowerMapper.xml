@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="space.personal.mappers.FollowerMapper">
+    <insert id="save" parameterType="map">
+        INSERT INTO follower (member_id, custom_url) VALUES (#{memberId}, #{customUrl})
+    </insert>
+
+    <delete id="delete" parameterType="map">
+        DELETE FROM follower WHERE member_id = #{member.id} AND custom_url = #{customUrl}
+    </delete>
+
+    <update id="updateTwitchChannelId" parameterType="map">
+        UPDATE follower 
+        SET twitch_channel_id = #{twitch_channel_id} 
+        WHERE follower.member_id = #{member_id} AND 
+            custom_url = #{custom_url}
+    </update>
+
+    <select id="findFollower" parameterType="map" resultType="Follower">
+        SELECT * FROM follower WHERE member_id = #{member.id} AND custom_url = #{customUrl}
+    </select>
+
+    <select id="findAllFollowerByMemberId" parameterType="Long" resultType="String">
+        SELECT custom_url FROM follower WHERE member_id = #{memberId}
+    </select>
+</mapper>

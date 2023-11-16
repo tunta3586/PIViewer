@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="space.personal.mappers.LiveConfigMapper">
+    <insert id="save" parameterType="LiveConfig">
+        INSERT INTO live_config (name, custom_url, description, thumbnails_url, is_check, is_live, video_id) 
+        VALUES (#{name}, #{custom_url}, #{description}, #{thumbnails_url}, 0, #{is_live}, #{video_id})
+    </insert>
+
+    <update id="updateLiveConfig" parameterType="LiveConfig">
+        UPDATE live_config 
+        SET is_live = #{is_live},
+            video_id = #{video_id},
+            is_check = #{is_check}
+        WHERE id = #{id}
+    </update>
+
+    <update id="setByIsCheckFalseAll">
+        UPDATE live_config SET is_check = FALSE
+    </update>
+
+    <delete id="delete" parameterType="LiveConfig">
+        DELETE FROM live_config WHERE name = #{name}
+    </delete>
+
+    <select id="findByCustomUrl" parameterType="String" resultType="LiveConfig">
+        SELECT * FROM live_config WHERE custom_url = #{custom_url}
+    </select>
+
+    <select id="existsByCustomUrl" resultType="boolean" parameterType="String">
+        SELECT COUNT(*)
+        FROM follower
+        WHERE custom_url = #{custom_url}
+    </select>
+
+    <select id="countByIsCheckFalse" resultType="int">
+        SELECT COUNT(*) FROM live_config WHERE is_check = FALSE
+    </select>
+
+    <select id="findAll" resultType="LiveConfig">
+        SELECT * FROM live_config
+    </select>
+
+    <select id="findByIsCheckFalse" resultType="LiveConfig">
+        SELECT * FROM live_config WHERE is_check = FALSE
+    </select>
+</mapper>
