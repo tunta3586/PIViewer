@@ -137,14 +137,14 @@ public class BroadcastSearchController {
     @GetMapping("/setLiveStreamTwitchChannelId")
     @ResponseBody
     public boolean setLiveStreamTwitchChannelId(Model model, 
-        @RequestParam("custumUrl") String customUrl, 
+        @RequestParam("custumUrl") String custumUrl, 
         @RequestParam("twitchChannelId") String twitchChannelId, 
         HttpServletRequest request
     ){  
         Member member = (Member)sessionManager.getSession(request);
         if(member != null){
             member = memberService.findUser(member.getUsername());
-            LiveConfig liveConfig = memberService.searchChannel(customUrl);
+            LiveConfig liveConfig = memberService.searchChannel(custumUrl);
             List<Follower> followers = member.getFollowers();
             for(Follower follower : followers){
                 if(follower.getLiveConfig().equals(liveConfig)){
