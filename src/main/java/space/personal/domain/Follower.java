@@ -17,13 +17,13 @@ public class Follower {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "twitch_channel_id")
-    private String twitchChannelId;
+    private String twitch_channel_id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", referencedColumnName = "username")
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "customUrl", referencedColumnName = "customUrl")
+    @JoinColumn(name = "custom_url", referencedColumnName = "custom_url")
     private LiveConfig liveConfig;
 }

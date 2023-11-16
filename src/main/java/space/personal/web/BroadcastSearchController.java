@@ -18,16 +18,19 @@ import space.personal.domain.Member;
 import space.personal.domain.TwitchSearchResult;
 import space.personal.domain.youtube.SearchResult;
 import space.personal.service.MemberService;
+import space.personal.service.SearchService;
 
 @Controller
 @CrossOrigin(origins = "${cors.origins}", allowCredentials = "true")
 public class BroadcastSearchController {
     public final MemberService memberService;
+    public final SearchService searchService;
     public final SessionManager sessionManager;
 
-    public BroadcastSearchController(MemberService memberService, SessionManager sessionManager) {
+    public BroadcastSearchController(MemberService memberService, SessionManager sessionManager, SearchService searchService) {
         this.memberService = memberService;
         this.sessionManager = sessionManager;
+        this.searchService = searchService;
     }
 
     // 기능에 대해서 다시 생각
@@ -124,7 +127,7 @@ public class BroadcastSearchController {
             List<Follower> followers = member.getFollowers();
             for(Follower follower : followers){
                 if(follower.getLiveConfig().equals(liveConfig)){
-                    return follower.getTwitchChannelId();
+                    return follower.getTwitch_channel_id();
                 }
             }
         }
@@ -145,8 +148,8 @@ public class BroadcastSearchController {
             List<Follower> followers = member.getFollowers();
             for(Follower follower : followers){
                 if(follower.getLiveConfig().equals(liveConfig)){
-                    follower.setTwitchChannelId(twitchChannelId);
-                    memberService.setTwitchChannelId(follower);
+                    follower.setTwitch_channel_id(twitchChannelId);
+                    memberService.setTwitchChannelId(follower, twitchChannelId);
                     return true;
                 }
             }
@@ -159,7 +162,7 @@ public class BroadcastSearchController {
     public TwitchSearchResult twitchSearchChannel(Model model, @RequestParam("search") String query, 
         HttpServletRequest request) {
         if(sessionManager.getSession(request)!= null){
-            TwitchSearchResult twitchSearchResult = memberService.twitchSearchChannel(query);
+            TwitchSearchResult twitchSearchResult = searchService.twitchSearchChannel(query);
             return twitchSearchResult;
         }
         return new TwitchSearchResult();

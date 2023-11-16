@@ -17,15 +17,15 @@ public class LiveConfig {
     private String name;
     private String description;
     @Column(name = "custom_url")
-    private String customUrl;
+    private String custom_url;
     @Column(name = "thumbnails_url")
-    private String thumbnailsUrl;
+    private String thumbnails_url;
 
     // 나중에 Enum으로 다시 처리할 예정
     @Column(name = "is_live")
-    private String isLive;
+    private String is_live;
     @Column(name = "video_id")
-    private String videoId;
+    private String video_id;
     @Column(name = "is_check")
-    private boolean isCheck;
+    private boolean is_check;
 }
