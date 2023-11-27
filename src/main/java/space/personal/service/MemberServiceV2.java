@@ -17,13 +17,6 @@ import space.personal.mappers.LiveConfigMapper;
 import space.personal.mappers.MemberMapper;
 
 public class MemberServiceV2 implements MemberService{
-    @Value("${youtube.api.key}")
-    private String youtubeApiKey;
-    @Value("${twitch.api.client.id}")
-    private String twitchClientId;
-    @Value("${twitch.api.client.acces_token}")
-    private String twitchStringToken;
-
     private final FollowerMapper followerMapper;
     private final LiveConfigMapper liveConfigMapper;
     private final MemberMapper memberMapper;

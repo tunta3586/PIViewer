@@ -21,13 +21,6 @@ import space.personal.repository.MemberRepository;
 @Service
 @Transactional
 public class MemberServiceV1 implements MemberService{
-    @Value("${youtube.api.key}")
-    private String youtubeApiKey;
-    @Value("${twitch.api.client.id}")
-    private String twitchClientId;
-    @Value("${twitch.api.client.acces_token}")
-    private String twitchStringToken;
-    
     private MemberRepository memberRepository;
     private FollowerRepository followerRepository;
     private LiveConfigRepository liveConfigRepository;
@@ -90,7 +83,7 @@ public class MemberServiceV1 implements MemberService{
     /**
     * @param member
      * @param follower
-     * @return 
+     * @return boolean
      */
     @Override
     public boolean checkFollow(Member member, String customUrl){
@@ -105,7 +98,6 @@ public class MemberServiceV1 implements MemberService{
     /**
      * @param member
      * @param follower
-     * @return
      */
     @Override
     public void follow(Member member, Follower follower){
@@ -116,7 +108,6 @@ public class MemberServiceV1 implements MemberService{
     /**
      * @param member
      * @param follower
-     * @return
      */
     @Override
     public void setTwitchChannelId(Follower follower, String twitchChannelId) {
@@ -135,7 +126,7 @@ public class MemberServiceV1 implements MemberService{
 
     /**
      * @param id
-     * @return
+     * @return Member
      */
     @Override
     public Member findUser(String username){
@@ -146,13 +137,17 @@ public class MemberServiceV1 implements MemberService{
     /**
      * @param member
      * @param youtubeChannelId
-     * @return
+     * @return Follower
      */
     @Override
     public Follower findFollower(Member member, String youtubeChannelId){
         return followerRepository.findFollower(member, youtubeChannelId);
     }
 
+    /**
+     * @param customUrl
+     * @return LiveConfig
+     */
     @Override
     public LiveConfig searchChannel(String customUrl){
         return Optional.ofNullable(liveConfigRepository.findByCustomUrl(customUrl)).orElse(null);
