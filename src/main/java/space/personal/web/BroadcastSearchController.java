@@ -16,7 +16,7 @@ import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
 import space.personal.domain.TwitchSearchResult;
-import space.personal.domain.youtube.SearchResult;
+import space.personal.domain.search.SearchResult;
 import space.personal.service.MemberService;
 import space.personal.service.SearchService;
 

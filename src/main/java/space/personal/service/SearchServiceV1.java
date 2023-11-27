@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import space.personal.domain.TwitchSearchResult;
-import space.personal.domain.youtube.YoutubeChannelList;
-import space.personal.domain.youtube.YoutubeSearchResult;
+import space.personal.domain.search.YoutubeChannelList;
+import space.personal.domain.search.YoutubeSearchResult;
 
 public class SearchServiceV1 implements SearchService {
     @Value("${youtube.api.key}")
