@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
