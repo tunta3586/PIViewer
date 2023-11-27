@@ -1,4 +1,4 @@
-package space.personal.domain.youtube;
+package space.personal.domain.search;
 
 import java.util.List;
 
@@ -8,18 +8,19 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class YoutubeSearchResult {
-    private List<Items> items;
+public class YoutubeChannelList {
     private String nextPageToken;
-    private PageInfo pageInfo;
+    private List<Items> items;
     
     @JsonIgnoreProperties(ignoreUnknown = true) @Data
     public static class Items{
         private Snippet snippet;
-        private ContentDetails contentDetails;
 
         @JsonIgnoreProperties(ignoreUnknown = true) @Data
         public static class Snippet {
+            private String title;
+            private String customUrl;
+            private String description;
             private String channelTitle;
             private Thumbnails thumbnails;
         }
@@ -33,25 +34,5 @@ public class YoutubeSearchResult {
         public static class Image {
             private String url;
         }
-
-        @JsonIgnoreProperties(ignoreUnknown = true) @Data
-        public static class ContentDetails {
-            private Subscription subscription;
-        }
-
-        @JsonIgnoreProperties(ignoreUnknown = true) @Data
-        public static class Subscription {
-            private ResourceId resourceId;
-        }
-
-        @JsonIgnoreProperties(ignoreUnknown = true) @Data
-        public static class ResourceId {
-            private String channelId;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true) @Data
-    public static class PageInfo {
-        private int totalResults;
     }
 }

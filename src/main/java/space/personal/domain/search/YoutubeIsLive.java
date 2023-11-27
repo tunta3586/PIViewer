@@ -1,4 +1,4 @@
-package space.personal.domain.youtube;
+package space.personal.domain.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
