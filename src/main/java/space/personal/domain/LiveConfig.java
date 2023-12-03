@@ -21,7 +21,6 @@ public class LiveConfig {
     @Column(name = "thumbnails_url")
     private String thumbnails_url;
 
-    // 나중에 Enum으로 다시 처리할 예정
     @Column(name = "is_live")
     private String is_live;
     @Column(name = "video_id")

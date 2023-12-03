@@ -33,7 +33,6 @@ public class BroadcastSearchController {
         this.searchService = searchService;
     }
 
-    // 기능에 대해서 다시 생각
     @GetMapping("/follow")
     @ResponseBody
     public void follow(Model model, 
@@ -59,8 +58,6 @@ public class BroadcastSearchController {
         }
     }
 
-    // 생각해보면 크게 문제는 안될것 같다.
-    // 기능은 있으면 편하고 없으면 불편한 딱 그정도
     @GetMapping("/unFollow")
     @ResponseBody
     public void unFollow(Model model, 
@@ -74,8 +71,6 @@ public class BroadcastSearchController {
         }
     }
 
-    // 생각해보면 크게 문제는 안될것 같다.
-    // 기능은 있으면 편하고 없으면 불편한 딱 그정도
     @GetMapping("/searchChannel")
     @ResponseBody
     public SearchResult searchChannel(Model model, 
@@ -94,8 +89,6 @@ public class BroadcastSearchController {
         return searchResult;
     }
 
-    // 생각해보면 크게 문제는 안될것 같다.
-    // 기능은 있으면 편하고 없으면 불편한 딱 그정도
     @GetMapping("/getFollowChannels")
     @ResponseBody
     public List<LiveConfig> getFollowChannels(Model model, 
