@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import space.personal.domain.Follower;
 import space.personal.domain.Member;
+import space.personal.domain.SearchFollower;
 
 @Mapper
 public interface FollowerMapper {
@@ -14,5 +15,5 @@ public interface FollowerMapper {
     void delete(Member member, @Param("customUrl") String customUrl);
     void updateTwitchChannelId(@Param("twitch_channel_id") String twitch_channel_id, @Param("member_id") Long member_id, @Param("custom_url") String customUrl);
     Follower findFollower(Member member, @Param("customUrl") String customUrl);
-    List<String> findAllFollowerByMemberId(@Param("memberId") Long memberId);
+    List<SearchFollower> findAllFollowerByMemberId(@Param("memberId") Long memberId);
 }

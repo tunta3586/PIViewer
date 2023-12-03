@@ -7,6 +7,7 @@ import java.util.Optional;
 import space.personal.domain.Follower;
 import space.personal.domain.LiveConfig;
 import space.personal.domain.Member;
+import space.personal.domain.SearchFollower;
 import space.personal.domain.search.YoutubeChannelList;
 import space.personal.domain.search.YoutubeSearchResult;
 import space.personal.domain.search.YoutubeSearchResult.Items;
@@ -98,7 +99,7 @@ public class MemberServiceV2 implements MemberService{
         if(member == null){
             return null;
         }
-        List<String> urlList = followerMapper.findAllFollowerByMemberId(member.getId());
+        List<SearchFollower> urlList = followerMapper.findAllFollowerByMemberId(member.getId());
         List<Follower> followers = setFollowers(member, urlList);
         member.setFollowers(followers);
 
@@ -115,12 +116,13 @@ public class MemberServiceV2 implements MemberService{
         return liveConfigMapper.findByCustomUrl(customUrl);
     }
 
-    public List<Follower> setFollowers(Member member, List<String> urlList) {
+    public List<Follower> setFollowers(Member member, List<SearchFollower> urlList) {
         List<Follower> followers = new ArrayList<Follower>();
-        for(String url : urlList) {
+        for(SearchFollower url : urlList) {
             Follower follower = new Follower();
             follower.setId(member.getId());
-            follower.setLiveConfig(liveConfigMapper.findByCustomUrl(url));
+            follower.setTwitch_channel_id(url.getTwitch_channel_id());
+            follower.setLiveConfig(liveConfigMapper.findByCustomUrl(url.getCustom_url()));
             followers.add(follower);
         }
         return followers;

@@ -22,7 +22,7 @@
         SELECT * FROM follower WHERE member_id = #{member.id} AND custom_url = #{customUrl}
     </select>
 
-    <select id="findAllFollowerByMemberId" parameterType="Long" resultType="String">
-        SELECT custom_url FROM follower WHERE member_id = #{memberId}
+    <select id="findAllFollowerByMemberId" parameterType="Long" resultType="SearchFollower">
+        SELECT twitch_channel_id, custom_url FROM follower WHERE member_id = #{memberId}
     </select>
 </mapper>
